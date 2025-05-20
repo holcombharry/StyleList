@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Mandates that the agent rerun ./fr.sh to regenerate the folder structure reference file upon any structural change to the codebase.
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+Whenever a new folder is created or an existing folder is renamed or removed, or whenever a new file is added to the codebase, the `./fr.sh` script must be re-executed. This script updates `repo_structure.yaml`, which serves as the central source of truth for the folder structure.
+
+Do not allow folder changes without ensuring that `./fr.sh` has been rerun immediately afterward.

@@ -1,0 +1,42 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# TypeScript
+*.tsbuildinfo
+
+# Expo
+/.expo/
+/web-build/
+
+# Backend
+/backend/dist
+/backend/node_modules
+
+# Frontend
+/frontend/node_modules
+/frontend/.expo
+/frontend/web-build
+
+# IDE files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files (secrets)
+.env
+.env.* 

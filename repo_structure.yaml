@@ -1,0 +1,189 @@
+  - path: /frontend
+    type: directory
+    contents:
+    - path: /frontend/App.tsx
+      type: file
+    - path: /frontend/app.json
+      type: file
+    - path: /frontend/metro.config.js
+      type: file
+    - path: /frontend/babel.config.js
+      type: file
+    - path: /frontend/package-lock.json
+      type: file
+    - path: /frontend/package.json
+      type: file
+    - path: /frontend/tsconfig.json
+      type: file
+    - path: /frontend/index.ts
+      type: file
+    - path: /frontend/assets
+      type: directory
+      contents:
+      - path: /frontend/assets/icon.png
+        type: file
+      - path: /frontend/assets/images
+        type: directory
+        contents:
+      - path: /frontend/assets/g-logo.png
+        type: file
+      - path: /frontend/assets/favicon.png
+        type: file
+      - path: /frontend/assets/adaptive-icon.png
+        type: file
+      - path: /frontend/assets/splash-icon.png
+        type: file
+    - path: /frontend/src
+      type: directory
+      contents:
+      - path: /frontend/src/types
+        type: directory
+        contents:
+        - path: /frontend/src/types/env.d.ts
+          type: file
+      - path: /frontend/src/context
+        type: directory
+        contents:
+        - path: /frontend/src/context/NotificationsContext.tsx
+          type: file
+        - path: /frontend/src/context/AuthContext.tsx
+          type: file
+      - path: /frontend/src/app
+        type: directory
+        contents:
+        - path: /frontend/src/app/index.tsx
+          type: file
+        - path: /frontend/src/app/login.tsx
+          type: file
+        - path: /frontend/src/app/home.tsx
+          type: file
+        - path: /frontend/src/app/signup.tsx
+          type: file
+        - path: /frontend/src/app/reset-code.tsx
+          type: file
+        - path: /frontend/src/app/reset-password.tsx
+          type: file
+        - path: /frontend/src/app/_layout.tsx
+          type: file
+        - path: /frontend/src/app/forgot-password.tsx
+          type: file
+      - path: /frontend/src/config
+        type: directory
+        contents:
+      - path: /frontend/src/utils
+        type: directory
+        contents:
+      - path: /frontend/src/screens
+        type: directory
+        contents:
+        - path: /frontend/src/screens/ForgotPasswordScreen.tsx
+          type: file
+        - path: /frontend/src/screens/SignupScreen.tsx
+          type: file
+        - path: /frontend/src/screens/ResetCodeScreen.tsx
+          type: file
+        - path: /frontend/src/screens/HomeScreen.tsx
+          type: file
+        - path: /frontend/src/screens/LoginScreen.tsx
+          type: file
+        - path: /frontend/src/screens/ResetPasswordScreen.tsx
+          type: file
+      - path: /frontend/src/components
+        type: directory
+        contents:
+        - path: /frontend/src/components/forms
+          type: directory
+          contents:
+          - path: /frontend/src/components/forms/VerificationCodeInput.tsx
+            type: file
+          - path: /frontend/src/components/forms/FormComponents.tsx
+            type: file
+        - path: /frontend/src/components/auth
+          type: directory
+          contents:
+          - path: /frontend/src/components/auth/GoogleLoginButton.tsx
+            type: file
+          - path: /frontend/src/components/auth/AppleLoginButton.tsx
+            type: file
+      - path: /frontend/src/theme
+        type: directory
+        contents:
+        - path: /frontend/src/theme/colors.ts
+          type: file
+        - path: /frontend/src/theme/ThemeContext.tsx
+          type: file
+      - path: /frontend/src/hooks
+        type: directory
+        contents:
+        - path: /frontend/src/hooks/useThemeColor.ts
+          type: file
+      - path: /frontend/src/services
+        type: directory
+        contents:
+        - path: /frontend/src/services/apiService.js
+          type: file
+        - path: /frontend/src/services/apiService.ts
+          type: file
+  - path: /backend
+    type: directory
+    contents:
+    - path: /backend/README.md
+      type: file
+    - path: /backend/package-lock.json
+      type: file
+    - path: /backend/package.json
+      type: file
+    - path: /backend/tsconfig.json
+      type: file
+    - path: /backend/src
+      type: directory
+      contents:
+      - path: /backend/src/middleware
+        type: directory
+        contents:
+        - path: /backend/src/middleware/authMiddleware.ts
+          type: file
+      - path: /backend/src/utils
+        type: directory
+        contents:
+        - path: /backend/src/utils/emailTemplates
+          type: directory
+          contents:
+          - path: /backend/src/utils/emailTemplates/passwordResetCode.html
+            type: file
+        - path: /backend/src/utils/emailService.ts
+          type: file
+      - path: /backend/src/models
+        type: directory
+        contents:
+        - path: /backend/src/models/User.ts
+          type: file
+      - path: /backend/src/index.ts
+        type: file
+      - path: /backend/src/controllers
+        type: directory
+        contents:
+        - path: /backend/src/controllers/testController.ts
+          type: file
+        - path: /backend/src/controllers/authController.ts
+          type: file
+        - path: /backend/src/controllers/notificationController.ts
+          type: file
+      - path: /backend/src/server.ts
+        type: file
+      - path: /backend/src/routes
+        type: directory
+        contents:
+        - path: /backend/src/routes/test.routes.ts
+          type: file
+        - path: /backend/src/routes/index.ts
+          type: file
+        - path: /backend/src/routes/notificationRoutes.ts
+          type: file
+        - path: /backend/src/routes/auth.ts
+          type: file
+      - path: /backend/src/services
+        type: directory
+        contents:
+  - path: /README.md
+    type: file

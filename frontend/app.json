@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "StyleList",
+    "slug": "stylelist",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hlabs.stylelist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.hlabs.stylelist"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "scheme": "stylelist",
+    "projectId": "77ad8fe8-9387-4b6f-9a8e-4449b7d1e0bc",
+    "extra": {
+      "eas": {
+        "projectId": "08dd4fa7-dffe-4514-b55f-6db1f27fcd18"
+      },
+      "router": {}
+    },
+    "owner": "holcombharry"
+  }
+}

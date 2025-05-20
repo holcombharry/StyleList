@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Informs the agent that the project folder structure is stored in repo_structure.yaml and should be used as the source of truth for reasoning about the project layout.
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+The project's folder structure is centrally documented in a file named `repo_structure.yaml` at the root of the repository. Use this file as the authoritative reference when interpreting or reasoning about the layout and architecture of the codebase.
+
+Before suggesting or making structural changes (e.g., where to place a file), consult `repo_structure.yaml` to ensure consistency with the documented structure.

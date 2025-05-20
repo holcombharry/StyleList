@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+{
+  "rule": "Safe Conditional Rendering in React Native",
+  "description": "Always use ternary expressions instead of logical AND (&&) when rendering components conditionally in JSX to prevent invalid returns like `undefined`, which can cause runtime errors in React Native.",
+  "examples": {
+    "bad": [
+      "condition && <MyComponent />",
+      "value > 0 && <Text>{value}</Text>"
+    ],
+    "good": [
+      "condition ? <MyComponent /> : null",
+      "value > 0 ? <Text>{value}</Text> : null"
+    ]
+  },
+  "enforcement": {
+    "contexts": ["React Native", "JSX"],
+    "priority": "high",
+    "rationale": "React Native throws an 'Invariant Violation' error if a JSX expression returns `undefined` or a primitive outside of a <Text> component. Using ternaries avoids this issue and leads to more predictable render behavior."
+  }
+}
