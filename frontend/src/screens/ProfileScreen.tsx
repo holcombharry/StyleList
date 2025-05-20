@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { UserProfile, UserProfileUpdateParams, UserSettings } from '../types/user';
 import { userAPI } from '../services/apiService';
+import { parsePhoneNumberFromString, AsYouType, isPossiblePhoneNumber, CountryCode } from 'libphonenumber-js';
 
 const ProfileScreen: React.FC = () => {
   // Theme and colors
@@ -51,6 +52,9 @@ const ProfileScreen: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  // Default country for phone number parsing - can be made configurable
+  const [defaultCountry, setDefaultCountry] = useState<CountryCode>('US');
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -121,8 +125,30 @@ const ProfileScreen: React.FC = () => {
     fetchUserProfile();
   }, [user, theme]);
 
+  // Function to validate phone number using libphonenumber-js
+  const validatePhoneNumber = (phone: string): boolean => {
+    if (!phone) return true; // Empty is valid (optional field)
+    
+    // Check if it contains asterisks (obfuscated number) - not valid for input
+    if (phone.includes('*')) return false;
+    
+    // Use isPossiblePhoneNumber to check if valid
+    return isPossiblePhoneNumber(phone, defaultCountry);
+  };
+
+  // Format phone number as user types
+  const formatPhoneNumber = (input: string): string => {
+    // Format using AsYouType formatter
+    return new AsYouType(defaultCountry).input(input);
+  };
+
   const handleEditProfile = () => {
     setIsEditing(true);
+    // Clear phone field when entering edit mode to avoid validation issues with obfuscated numbers
+    setFormData(prev => ({
+      ...prev,
+      phone: '',
+    }));
   };
 
   const handleCancel = () => {
@@ -136,10 +162,68 @@ const ProfileScreen: React.FC = () => {
     }
     setIsEditing(false);
     setError(null);
+    setPhoneError(null);
+  };
+
+  // Add an onFocus handler for the phone input to clear obfuscated numbers
+  const handlePhoneFocus = () => {
+    // Clear phone field if it contains asterisks (obfuscated)
+    if (formData.phone && formData.phone.includes('*')) {
+      setFormData(prev => ({
+        ...prev,
+        phone: '',
+      }));
+    }
+  };
+
+  // Handle phone input with formatting
+  const handlePhoneChange = (value: string) => {
+    // Check if we're deleting characters
+    if (value.length < (formData.phone?.length || 0)) {
+      // If deleting, just update with the raw value without formatting
+      setFormData(prev => ({
+        ...prev,
+        phone: value,
+      }));
+      
+      // Still validate, but be lenient during deletion
+      if (value === '' || validatePhoneNumber(value)) {
+        setPhoneError(null);
+      } else {
+        // Don't show error during deletion unless completely invalid
+        if (value.length > 6) {
+          setPhoneError('Please enter a valid phone number');
+        }
+      }
+      return;
+    }
+    
+    // Only format when adding characters
+    const formattedNumber = formatPhoneNumber(value);
+    
+    // Update the input field with formatted value
+    setFormData(prev => ({
+      ...prev,
+      phone: formattedNumber,
+    }));
+    
+    // Validate the number
+    if (validatePhoneNumber(formattedNumber)) {
+      setPhoneError(null);
+    } else {
+      setPhoneError('Please enter a valid phone number');
+    }
   };
 
   const handleSave = async () => {
     if (!userProfile) return;
+    
+    // Check for existing validation errors
+    if (phoneError) {
+      setError('Please fix the validation errors before saving');
+      return;
+    }
+    
     setIsSaving(true);
     setError(null);
     
@@ -149,10 +233,25 @@ const ProfileScreen: React.FC = () => {
         throw new Error('Name cannot be empty');
       }
 
+      // Phone validation
+      if (formData.phone && !validatePhoneNumber(formData.phone)) {
+        throw new Error('Invalid phone number format');
+      }
+
+      // Parse and normalize the phone number before sending to the API
+      let phoneToSave = formData.phone;
+      if (formData.phone) {
+        const phoneNumber = parsePhoneNumberFromString(formData.phone, defaultCountry);
+        if (phoneNumber) {
+          // Use E.164 format for storage (standardized international format)
+          phoneToSave = phoneNumber.format('E.164');
+        }
+      }
+
       // Prepare update data
       const updateData = {
         name: formData.name,
-        phone: formData.phone,
+        phone: phoneToSave,
         emailUpdates: formData.settings?.emailUpdates
       };
 
@@ -224,6 +323,42 @@ const ProfileScreen: React.FC = () => {
         { text: 'Cancel', style: 'cancel' },
         { text: 'Logout', onPress: logout, style: 'destructive' },
       ]
+    );
+  };
+
+  // Replace phone input with libphonenumber-enhanced version
+  const renderPhoneInput = () => {
+    if (!userProfile) return null;
+    
+    return (
+      <View style={[styles.formItem, { borderColor }]}>
+        <Text style={[styles.label, { color: textColor }]}>Phone</Text>
+        {isEditing ? (
+          <>
+            <TextInput
+              style={[
+                styles.input, 
+                { color: textColor, borderColor: phoneError ? errorColor : borderColor }
+              ]}
+              value={formData.phone}
+              onChangeText={handlePhoneChange}
+              onFocus={handlePhoneFocus}
+              placeholder="Enter your phone number"
+              placeholderTextColor={secondaryColor}
+              keyboardType="phone-pad"
+            />
+            {phoneError && (
+              <Text style={[styles.errorText, { color: errorColor }]}>
+                {phoneError}
+              </Text>
+            )}
+          </>
+        ) : (
+          <Text style={[styles.value, { color: textColor }]}>
+            {userProfile.phone || 'Not provided'}
+          </Text>
+        )}
+      </View>
     );
   };
 
@@ -317,23 +452,8 @@ const ProfileScreen: React.FC = () => {
         <View style={styles.formSection}>
           <Text style={[styles.sectionTitle, { color: primaryColor }]}>Personal Information</Text>
           
-          <View style={[styles.formItem, { borderColor }]}>
-            <Text style={[styles.label, { color: textColor }]}>Phone</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, { color: textColor }]}
-                value={formData.phone}
-                onChangeText={(value) => handleInputChange('phone', value)}
-                placeholder="Your phone number"
-                placeholderTextColor={secondaryColor}
-                keyboardType="phone-pad"
-              />
-            ) : (
-              <Text style={[styles.value, { color: textColor }]}>
-                {userProfile.phone || 'Not provided'}
-              </Text>
-            )}
-          </View>
+          {/* Use the enhanced phone input */}
+          {renderPhoneInput()}
         </View>
         
         <View style={styles.formSection}>
@@ -551,6 +671,10 @@ const styles = StyleSheet.create({
   accountText: {
     fontSize: 12,
     marginBottom: 4,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
   },
 });
 
