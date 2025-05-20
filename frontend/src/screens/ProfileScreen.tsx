@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   headerButtonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '500',
   },
   profileHeader: {
