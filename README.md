@@ -44,7 +44,7 @@ This repository contains a monorepo setup with:
 
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.appframework.stylelist"
+      "bundleIdentifier": "com.hlabs.stylelist"
     },
     "android": {
       "adaptiveIcon": {
@@ -52,7 +52,7 @@ This repository contains a monorepo setup with:
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.appframework.stylelist"
+      "package": "com.hlabs.stylelist"
     },
 
 ### Frontend Setup

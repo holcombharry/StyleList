@@ -11,7 +11,7 @@ import routes from './routes';
 
 // Load environment variables
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/app-framework';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/stylelist';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Initialize Express app

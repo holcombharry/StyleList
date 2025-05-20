@@ -5,6 +5,8 @@
       type: file
     - path: /frontend/app.json
       type: file
+    - path: /frontend/eas.json
+      type: file
     - path: /frontend/metro.config.js
       type: file
     - path: /frontend/babel.config.js
@@ -22,9 +24,6 @@
       contents:
       - path: /frontend/assets/icon.png
         type: file
-      - path: /frontend/assets/images
-        type: directory
-        contents:
       - path: /frontend/assets/g-logo.png
         type: file
       - path: /frontend/assets/favicon.png
@@ -67,12 +66,6 @@
           type: file
         - path: /frontend/src/app/forgot-password.tsx
           type: file
-      - path: /frontend/src/config
-        type: directory
-        contents:
-      - path: /frontend/src/utils
-        type: directory
-        contents:
       - path: /frontend/src/screens
         type: directory
         contents:
@@ -182,8 +175,5 @@
           type: file
         - path: /backend/src/routes/auth.ts
           type: file
-      - path: /backend/src/services
-        type: directory
-        contents:
   - path: /README.md
     type: file
