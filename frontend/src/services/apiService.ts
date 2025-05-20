@@ -185,7 +185,7 @@ export const userAPI = {
   },
   
   // Update user profile
-  updateProfile: async (userData: { name?: string; phone?: string; emailUpdates?: boolean }) => {
+  updateProfile: async (userData: { name?: string; emailUpdates?: boolean }) => {
     return fetchWithAuth('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(userData),

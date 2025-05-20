@@ -2,7 +2,6 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  phone?: string;
   avatar?: string;
   settings?: UserSettings;
 }
@@ -20,7 +19,6 @@ export interface UserProfile extends User {
 
 export interface UserProfileUpdateParams {
   name?: string;
-  phone?: string;
   avatar?: string;
   settings?: Partial<UserSettings>;
 } 

@@ -5,7 +5,6 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  phone?: string;
   profilePicture?: string;
   authProvider?: 'local' | 'google' | 'apple';
   appleUserId?: string;
@@ -48,10 +47,6 @@ const UserSchema = new Schema<IUser>(
       },
       minlength: [8, 'Password must be at least 8 characters'],
       select: false,
-    },
-    phone: {
-      type: String,
-      trim: true,
     },
     profilePicture: {
       type: String,

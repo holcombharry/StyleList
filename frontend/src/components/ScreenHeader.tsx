@@ -4,6 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeColor } from '../hooks/useThemeColor';
 import { router } from 'expo-router';
 
+/**
+ * ScreenHeader - A consistent header component for all screens
+ * 
+ * @prop title - The title text to display in the header
+ * @prop showBackButton - Whether to show a back button (defaults to false)
+ * @prop onBackPress - Optional custom handler for back button press (defaults to router.back())
+ * @prop rightComponent - Optional custom component to display on the right side (replaces profile icon)
+ */
 interface ScreenHeaderProps {
   title: string;
   showBackButton?: boolean;
@@ -60,7 +68,7 @@ const ScreenHeader: React.FC<ScreenHeaderProps> = ({
 const styles = StyleSheet.create({
   header: {
     width: '100%',
-    paddingTop: Platform.OS === 'ios' ? 48 : 16,
+    paddingTop: Platform.OS === 'ios' ? 56 : 20,
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
@@ -92,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   backButton: {

@@ -19,7 +19,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { UserProfile, UserProfileUpdateParams, UserSettings } from '../types/user';
 import { userAPI } from '../services/apiService';
-import { parsePhoneNumberFromString, AsYouType, isPossiblePhoneNumber, CountryCode } from 'libphonenumber-js';
 
 const ProfileScreen: React.FC = () => {
   // Theme and colors
@@ -43,7 +42,6 @@ const ProfileScreen: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<UserProfileUpdateParams>({
     name: '',
-    phone: '',
     settings: {
       notifications: true,
       darkMode: theme === 'dark',
@@ -52,9 +50,6 @@ const ProfileScreen: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-  // Default country for phone number parsing - can be made configurable
-  const [defaultCountry, setDefaultCountry] = useState<CountryCode>('US');
 
   // Fetch user profile on mount
   useEffect(() => {
@@ -71,7 +66,6 @@ const ProfileScreen: React.FC = () => {
                 id: response.data.id,
                 name: response.data.name,
                 email: response.data.email,
-                phone: response.data.phone || '',
                 avatar: response.data.profilePicture,
                 settings: {
                   notifications: true,
@@ -84,7 +78,6 @@ const ProfileScreen: React.FC = () => {
               setUserProfile(profile);
               setFormData({
                 name: profile.name,
-                phone: profile.phone || '',
                 settings: profile.settings,
               });
             } else {
@@ -97,7 +90,6 @@ const ProfileScreen: React.FC = () => {
               id: user.id,
               name: user.name,
               email: user.email,
-              phone: '',
               settings: {
                 notifications: true,
                 darkMode: theme === 'dark',
@@ -109,7 +101,6 @@ const ProfileScreen: React.FC = () => {
             setUserProfile(fallbackProfile);
             setFormData({
               name: fallbackProfile.name,
-              phone: fallbackProfile.phone || '',
               settings: fallbackProfile.settings,
             });
           }
@@ -125,30 +116,8 @@ const ProfileScreen: React.FC = () => {
     fetchUserProfile();
   }, [user, theme]);
 
-  // Function to validate phone number using libphonenumber-js
-  const validatePhoneNumber = (phone: string): boolean => {
-    if (!phone) return true; // Empty is valid (optional field)
-    
-    // Check if it contains asterisks (obfuscated number) - not valid for input
-    if (phone.includes('*')) return false;
-    
-    // Use isPossiblePhoneNumber to check if valid
-    return isPossiblePhoneNumber(phone, defaultCountry);
-  };
-
-  // Format phone number as user types
-  const formatPhoneNumber = (input: string): string => {
-    // Format using AsYouType formatter
-    return new AsYouType(defaultCountry).input(input);
-  };
-
   const handleEditProfile = () => {
     setIsEditing(true);
-    // Clear phone field when entering edit mode to avoid validation issues with obfuscated numbers
-    setFormData(prev => ({
-      ...prev,
-      phone: '',
-    }));
   };
 
   const handleCancel = () => {
@@ -156,73 +125,15 @@ const ProfileScreen: React.FC = () => {
     if (userProfile) {
       setFormData({
         name: userProfile.name,
-        phone: userProfile.phone || '',
         settings: userProfile.settings,
       });
     }
     setIsEditing(false);
     setError(null);
-    setPhoneError(null);
-  };
-
-  // Add an onFocus handler for the phone input to clear obfuscated numbers
-  const handlePhoneFocus = () => {
-    // Clear phone field if it contains asterisks (obfuscated)
-    if (formData.phone && formData.phone.includes('*')) {
-      setFormData(prev => ({
-        ...prev,
-        phone: '',
-      }));
-    }
-  };
-
-  // Handle phone input with formatting
-  const handlePhoneChange = (value: string) => {
-    // Check if we're deleting characters
-    if (value.length < (formData.phone?.length || 0)) {
-      // If deleting, just update with the raw value without formatting
-      setFormData(prev => ({
-        ...prev,
-        phone: value,
-      }));
-      
-      // Still validate, but be lenient during deletion
-      if (value === '' || validatePhoneNumber(value)) {
-        setPhoneError(null);
-      } else {
-        // Don't show error during deletion unless completely invalid
-        if (value.length > 6) {
-          setPhoneError('Please enter a valid phone number');
-        }
-      }
-      return;
-    }
-    
-    // Only format when adding characters
-    const formattedNumber = formatPhoneNumber(value);
-    
-    // Update the input field with formatted value
-    setFormData(prev => ({
-      ...prev,
-      phone: formattedNumber,
-    }));
-    
-    // Validate the number
-    if (validatePhoneNumber(formattedNumber)) {
-      setPhoneError(null);
-    } else {
-      setPhoneError('Please enter a valid phone number');
-    }
   };
 
   const handleSave = async () => {
     if (!userProfile) return;
-    
-    // Check for existing validation errors
-    if (phoneError) {
-      setError('Please fix the validation errors before saving');
-      return;
-    }
     
     setIsSaving(true);
     setError(null);
@@ -233,25 +144,9 @@ const ProfileScreen: React.FC = () => {
         throw new Error('Name cannot be empty');
       }
 
-      // Phone validation
-      if (formData.phone && !validatePhoneNumber(formData.phone)) {
-        throw new Error('Invalid phone number format');
-      }
-
-      // Parse and normalize the phone number before sending to the API
-      let phoneToSave = formData.phone;
-      if (formData.phone) {
-        const phoneNumber = parsePhoneNumberFromString(formData.phone, defaultCountry);
-        if (phoneNumber) {
-          // Use E.164 format for storage (standardized international format)
-          phoneToSave = phoneNumber.format('E.164');
-        }
-      }
-
       // Prepare update data
       const updateData = {
         name: formData.name,
-        phone: phoneToSave,
         emailUpdates: formData.settings?.emailUpdates
       };
 
@@ -263,7 +158,6 @@ const ProfileScreen: React.FC = () => {
         const updatedProfile: UserProfile = {
           ...userProfile,
           name: response.data.name,
-          phone: response.data.phone || '',
           avatar: response.data.profilePicture,
           settings: {
             notifications: userProfile.settings?.notifications ?? true,
@@ -326,46 +220,10 @@ const ProfileScreen: React.FC = () => {
     );
   };
 
-  // Replace phone input with libphonenumber-enhanced version
-  const renderPhoneInput = () => {
-    if (!userProfile) return null;
-    
-    return (
-      <View style={[styles.formItem, { borderColor }]}>
-        <Text style={[styles.label, { color: textColor }]}>Phone</Text>
-        {isEditing ? (
-          <>
-            <TextInput
-              style={[
-                styles.input, 
-                { color: textColor, borderColor: phoneError ? errorColor : borderColor }
-              ]}
-              value={formData.phone}
-              onChangeText={handlePhoneChange}
-              onFocus={handlePhoneFocus}
-              placeholder="Enter your phone number"
-              placeholderTextColor={secondaryColor}
-              keyboardType="phone-pad"
-            />
-            {phoneError && (
-              <Text style={[styles.errorText, { color: errorColor }]}>
-                {phoneError}
-              </Text>
-            )}
-          </>
-        ) : (
-          <Text style={[styles.value, { color: textColor }]}>
-            {userProfile.phone || 'Not provided'}
-          </Text>
-        )}
-      </View>
-    );
-  };
-
   if (isLoading || !userProfile) {
     return (
       <View style={[styles.container, { backgroundColor }]}>
-        <ScreenHeader title="Profile" />
+        <ScreenHeader title="Profile" showBackButton={true} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={primaryColor} />
           <Text style={[styles.loadingText, { color: textColor }]}>Loading profile...</Text>
@@ -378,6 +236,7 @@ const ProfileScreen: React.FC = () => {
     <View style={[styles.container, { backgroundColor }]}>
       <ScreenHeader
         title="Profile"
+        showBackButton={true}
         rightComponent={
           isEditing ? (
             <View style={styles.headerButtonsContainer}>
@@ -450,13 +309,6 @@ const ProfileScreen: React.FC = () => {
 
         {/* Form Sections */}
         <View style={styles.formSection}>
-          <Text style={[styles.sectionTitle, { color: primaryColor }]}>Personal Information</Text>
-          
-          {/* Use the enhanced phone input */}
-          {renderPhoneInput()}
-        </View>
-        
-        <View style={styles.formSection}>
           <Text style={[styles.sectionTitle, { color: primaryColor }]}>Preferences</Text>
           
           <View style={[styles.formItem, { borderColor }]}>
@@ -499,25 +351,16 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
         
-        {/* Logout Button */}
-        <TouchableOpacity
-          style={[styles.logoutButton, { borderColor: errorColor }]}
-          onPress={handleLogout}
-        >
-          <Ionicons name="log-out-outline" size={24} color={errorColor} />
-          <Text style={[styles.logoutText, { color: errorColor }]}>Logout</Text>
-        </TouchableOpacity>
-        
-        {/* Account Info */}
-        <View style={styles.accountInfo}>
-          <Text style={[styles.accountText, { color: secondaryColor }]}>
-            Account created: {new Date(userProfile.createdAt).toLocaleDateString()}
-          </Text>
-          {userProfile.lastActive && (
-            <Text style={[styles.accountText, { color: secondaryColor }]}>
-              Last active: {new Date(userProfile.lastActive).toLocaleDateString()}
-            </Text>
-          )}
+        {/* Account Actions */}
+        <View style={styles.formSection}>
+          <Text style={[styles.sectionTitle, { color: primaryColor }]}>Account</Text>
+          
+          <TouchableOpacity
+            style={[styles.actionButton, { borderColor }]}
+            onPress={handleLogout}
+          >
+            <Text style={[styles.actionButtonText, { color: errorColor }]}>Logout</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -530,6 +373,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    padding: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -537,7 +381,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 16,
+    marginTop: 12,
     fontSize: 16,
   },
   headerButtonsContainer: {
@@ -545,7 +389,6 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     paddingHorizontal: 12,
-    paddingVertical: 8,
   },
   headerButtonText: {
     fontSize: 16,
@@ -553,12 +396,13 @@ const styles = StyleSheet.create({
   },
   profileHeader: {
     alignItems: 'center',
-    padding: 20,
-    marginBottom: 16,
+    padding: 24,
+    borderRadius: 12,
+    marginBottom: 24,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   avatar: {
     width: 100,
@@ -586,40 +430,38 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 8,
+    marginBottom: 4,
   },
   nameInput: {
     fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 4,
     textAlign: 'center',
-    borderWidth: 1,
-    borderRadius: 8,
     padding: 8,
-    marginTop: 8,
-    width: '80%',
+    borderRadius: 8,
+    borderWidth: 1,
+    minWidth: 200,
   },
   email: {
     fontSize: 16,
-    marginTop: 4,
   },
   messageContainer: {
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
+    padding: 12,
     borderRadius: 8,
+    marginBottom: 16,
   },
   messageText: {
     color: 'white',
-    fontWeight: '500',
     textAlign: 'center',
   },
   formSection: {
     marginBottom: 24,
-    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -628,53 +470,42 @@ const styles = StyleSheet.create({
   },
   formItem: {
     paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
   },
   label: {
     fontSize: 16,
-    marginBottom: 4,
+    fontWeight: '500',
   },
   value: {
     fontSize: 16,
+    marginTop: 4,
   },
   input: {
     fontSize: 16,
-    padding: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    padding: Platform.OS === 'ios' ? 10 : 8,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 4,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: 4,
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 16,
-    marginBottom: 24,
-    paddingVertical: 16,
-    borderWidth: 1,
+  actionButton: {
+    padding: 16,
     borderRadius: 8,
-  },
-  logoutText: {
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  accountInfo: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    borderWidth: 1,
     alignItems: 'center',
   },
-  accountText: {
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: 4,
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
