@@ -1,6 +1,10 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useColorScheme } from 'react-native';
 import { Colors, ColorPalette, ThemeType } from './colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Storage key for theme preference
+const THEME_STORAGE_KEY = 'app_theme_preference';
 
 export interface ThemeContextType {
   theme: ThemeType;
@@ -27,18 +31,44 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const deviceColorScheme = useColorScheme() as ThemeType;
   
   // Initialize theme state with the device color scheme or 'light' as fallback
-  const [theme, setTheme] = useState<ThemeType>(deviceColorScheme || 'light');
+  const [theme, setThemeState] = useState<ThemeType>(deviceColorScheme || 'light');
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Update the theme when the device color scheme changes
+  // Load saved theme preference from storage on initial render
   useEffect(() => {
-    if (deviceColorScheme) {
-      setTheme(deviceColorScheme);
+    const loadSavedTheme = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+          setThemeState(savedTheme as ThemeType);
+        } else if (deviceColorScheme) {
+          // If no saved theme, use device preference
+          setThemeState(deviceColorScheme);
+        }
+      } catch (error) {
+        console.error('Failed to load theme preference:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSavedTheme();
+  }, []);
+
+  // Function to set theme and save to storage
+  const setTheme = async (newTheme: ThemeType) => {
+    try {
+      setThemeState(newTheme);
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    } catch (error) {
+      console.error('Failed to save theme preference:', error);
     }
-  }, [deviceColorScheme]);
+  };
 
   // Function to toggle between light and dark themes
-  const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  const toggleTheme = async () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    await setTheme(newTheme);
   };
 
   // Get the colors for the current theme
@@ -51,6 +81,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     setTheme,
     toggleTheme,
   };
+
+  // Show nothing while loading preferences
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={themeContextValue}>

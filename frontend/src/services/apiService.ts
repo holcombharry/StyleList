@@ -179,8 +179,13 @@ export const notificationAPI = {
 /* ===== Other APIs can be added here ===== */
 // Example: User API
 export const userAPI = {
+  // Get user profile
+  getProfile: async () => {
+    return fetchWithAuth('/users/profile');
+  },
+  
   // Update user profile
-  updateProfile: async (userData: { name?: string; email?: string }) => {
+  updateProfile: async (userData: { name?: string; phone?: string; emailUpdates?: boolean }) => {
     return fetchWithAuth('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(userData),

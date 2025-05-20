@@ -170,12 +170,16 @@
           type: file
         - path: /backend/src/controllers/notificationController.ts
           type: file
+        - path: /backend/src/controllers/userController.ts
+          type: file
       - path: /backend/src/server.ts
         type: file
       - path: /backend/src/routes
         type: directory
         contents:
         - path: /backend/src/routes/test.routes.ts
+          type: file
+        - path: /backend/src/routes/user.routes.ts
           type: file
         - path: /backend/src/routes/index.ts
           type: file

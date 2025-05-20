@@ -38,12 +38,11 @@ const ProfileScreen: React.FC = () => {
   // State management
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<UserProfileUpdateParams>({
     name: '',
     phone: '',
-    bio: '',
-    location: '',
     settings: {
       notifications: true,
       darkMode: theme === 'dark',
@@ -55,33 +54,71 @@ const ProfileScreen: React.FC = () => {
 
   // Fetch user profile on mount
   useEffect(() => {
-    if (user) {
-      // For now, mock profile data based on the auth user
-      const mockProfile: UserProfile = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: '',
-        bio: 'I love fashion and styling!',
-        location: 'New York, NY',
-        settings: {
-          notifications: true,
-          darkMode: theme === 'dark',
-          emailUpdates: true,
-        },
-        createdAt: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
-      };
-      
-      setUserProfile(mockProfile);
-      setFormData({
-        name: mockProfile.name,
-        phone: mockProfile.phone || '',
-        bio: mockProfile.bio || '',
-        location: mockProfile.location || '',
-        settings: mockProfile.settings,
-      });
-    }
+    const fetchUserProfile = async () => {
+      setIsLoading(true);
+      try {
+        if (user) {
+          // Try to get profile from API
+          try {
+            const response = await userAPI.getProfile();
+            
+            if (response.success && response.data) {
+              const profile: UserProfile = {
+                id: response.data.id,
+                name: response.data.name,
+                email: response.data.email,
+                phone: response.data.phone || '',
+                avatar: response.data.profilePicture,
+                settings: {
+                  notifications: true,
+                  darkMode: theme === 'dark',
+                  emailUpdates: response.data.emailUpdates,
+                },
+                createdAt: response.data.createdAt,
+              };
+              
+              setUserProfile(profile);
+              setFormData({
+                name: profile.name,
+                phone: profile.phone || '',
+                settings: profile.settings,
+              });
+            } else {
+              throw new Error('Failed to get profile data');
+            }
+          } catch (apiError) {
+            console.error('API error:', apiError);
+            // Fall back to auth user data if API fails
+            const fallbackProfile: UserProfile = {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phone: '',
+              settings: {
+                notifications: true,
+                darkMode: theme === 'dark',
+                emailUpdates: true,
+              },
+              createdAt: new Date().toISOString(),
+            };
+            
+            setUserProfile(fallbackProfile);
+            setFormData({
+              name: fallbackProfile.name,
+              phone: fallbackProfile.phone || '',
+              settings: fallbackProfile.settings,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError('Failed to load profile');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
   }, [user, theme]);
 
   const handleEditProfile = () => {
@@ -94,8 +131,6 @@ const ProfileScreen: React.FC = () => {
       setFormData({
         name: userProfile.name,
         phone: userProfile.phone || '',
-        bio: userProfile.bio || '',
-        location: userProfile.location || '',
         settings: userProfile.settings,
       });
     }
@@ -109,35 +144,46 @@ const ProfileScreen: React.FC = () => {
     setError(null);
     
     try {
-      // Here you would call the API to update the profile
-      // For now, we'll simulate it
-
       // Basic validation
       if (!formData.name || formData.name.trim() === '') {
         throw new Error('Name cannot be empty');
       }
 
-      // In a real app, call the API
-      // await userAPI.updateProfile(formData);
-
-      // Update local profile data (simulated)
-      const updatedProfile: UserProfile = {
-        ...userProfile,
+      // Prepare update data
+      const updateData = {
         name: formData.name,
         phone: formData.phone,
-        bio: formData.bio,
-        location: formData.location,
-        settings: formData.settings as UserSettings, // Ensure proper type
+        emailUpdates: formData.settings?.emailUpdates
       };
-      
-      setUserProfile(updatedProfile);
-      setIsEditing(false);
-      setSuccessMessage('Profile updated successfully');
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+
+      // Call API to update profile
+      const response = await userAPI.updateProfile(updateData);
+
+      if (response.success && response.data) {
+        // Update local profile data with API response
+        const updatedProfile: UserProfile = {
+          ...userProfile,
+          name: response.data.name,
+          phone: response.data.phone || '',
+          avatar: response.data.profilePicture,
+          settings: {
+            notifications: userProfile.settings?.notifications ?? true,
+            darkMode: userProfile.settings?.darkMode ?? (theme === 'dark'),
+            emailUpdates: response.data.emailUpdates,
+          },
+        };
+        
+        setUserProfile(updatedProfile);
+        setIsEditing(false);
+        setSuccessMessage('Profile updated successfully');
+        
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 3000);
+      } else {
+        throw new Error(response.message || 'Failed to update profile');
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
       setError(error instanceof Error ? error.message : 'Failed to update profile');
@@ -181,7 +227,7 @@ const ProfileScreen: React.FC = () => {
     );
   };
 
-  if (!userProfile) {
+  if (isLoading || !userProfile) {
     return (
       <View style={[styles.container, { backgroundColor }]}>
         <ScreenHeader title="Profile" />
@@ -285,43 +331,6 @@ const ProfileScreen: React.FC = () => {
             ) : (
               <Text style={[styles.value, { color: textColor }]}>
                 {userProfile.phone || 'Not provided'}
-              </Text>
-            )}
-          </View>
-          
-          <View style={[styles.formItem, { borderColor }]}>
-            <Text style={[styles.label, { color: textColor }]}>Location</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, { color: textColor }]}
-                value={formData.location}
-                onChangeText={(value) => handleInputChange('location', value)}
-                placeholder="Your location"
-                placeholderTextColor={secondaryColor}
-              />
-            ) : (
-              <Text style={[styles.value, { color: textColor }]}>
-                {userProfile.location || 'Not provided'}
-              </Text>
-            )}
-          </View>
-          
-          <View style={[styles.formItem, { borderColor }]}>
-            <Text style={[styles.label, { color: textColor }]}>Bio</Text>
-            {isEditing ? (
-              <TextInput
-                style={[styles.input, styles.multilineInput, { color: textColor }]}
-                value={formData.bio}
-                onChangeText={(value) => handleInputChange('bio', value)}
-                placeholder="Tell us about yourself"
-                placeholderTextColor={secondaryColor}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
-            ) : (
-              <Text style={[styles.value, { color: textColor }]}>
-                {userProfile.bio || 'No bio provided'}
               </Text>
             )}
           </View>
@@ -513,10 +522,6 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     backgroundColor: 'rgba(0,0,0,0.05)',
-  },
-  multilineInput: {
-    minHeight: 80,
-    paddingTop: 8,
   },
   settingRow: {
     flexDirection: 'row',
