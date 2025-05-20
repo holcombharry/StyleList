@@ -14,6 +14,7 @@ export interface ColorPalette {
   error: string;
   success: string;
   warning: string;
+  accent: string; // Fashion accent color
 }
 
 export interface ThemeColors {
@@ -23,27 +24,29 @@ export interface ThemeColors {
 
 export const Colors: ThemeColors = {
   light: {
-    primary: '#5E72E4',
-    secondary: '#8392AB',
-    background: '#FFFFFF',
-    card: '#F7FAFC',
-    text: '#1F2937',
-    border: '#E4E7EB',
-    notification: '#F56565',
-    error: '#DC2626',
-    success: '#10B981',
-    warning: '#F59E0B',
+    primary: '#121212', // Deep black for primary elements
+    secondary: '#8F8F8F', // Soft gray for secondary elements
+    background: '#FFFFFF', // Pure white background
+    card: '#F7F7F7', // Soft off-white for cards
+    text: '#121212', // Deep black for text
+    border: '#E6E6E6', // Light gray for borders
+    notification: '#E95B80', // Soft pink for notifications
+    error: '#E74C3C', // Bright red for errors
+    success: '#2ECC71', // Emerald green for success
+    warning: '#F39C12', // Amber for warnings
+    accent: '#9B6DFF', // Lavender accent color
   },
   dark: {
-    primary: '#7B8CFF',
-    secondary: '#A0AEC0',
-    background: '#1A202C',
-    card: '#2D3748',
-    text: '#F7FAFC',
-    border: '#4A5568',
-    notification: '#FEB2B2',
-    error: '#F87171',
-    success: '#34D399',
-    warning: '#FBBF24',
+    primary: '#F2F2F2', // Off-white for primary elements in dark mode
+    secondary: '#A0A0A0', // Medium gray for secondary elements
+    background: '#121212', // Deep black background
+    card: '#1E1E1E', // Dark gray for cards
+    text: '#F2F2F2', // Off-white text
+    border: '#333333', // Dark gray borders
+    notification: '#E95B80', // Soft pink for notifications
+    error: '#E74C3C', // Bright red for errors
+    success: '#2ECC71', // Emerald green for success
+    warning: '#F39C12', // Amber for warnings
+    accent: '#B48CFF', // Lighter lavender accent for dark mode
   },
 }; 
