@@ -147,6 +147,19 @@
       - path: /backend/src/utils
         type: directory
         contents:
+        - path: /backend/src/utils/scraper
+          type: directory
+          contents:
+          - path: /backend/src/utils/scraper/types.ts
+            type: file
+          - path: /backend/src/utils/scraper/test.ts
+            type: file
+          - path: /backend/src/utils/scraper/fashionScraper.ts
+            type: file
+          - path: /backend/src/utils/scraper/index.ts
+            type: file
+          - path: /backend/src/utils/scraper/retailers.ts
+            type: file
         - path: /backend/src/utils/emailTemplates
           type: directory
           contents:
@@ -166,6 +179,8 @@
         contents:
         - path: /backend/src/controllers/testController.ts
           type: file
+        - path: /backend/src/controllers/productController.ts
+          type: file
         - path: /backend/src/controllers/authController.ts
           type: file
         - path: /backend/src/controllers/notificationController.ts
@@ -180,6 +195,8 @@
         - path: /backend/src/routes/test.routes.ts
           type: file
         - path: /backend/src/routes/user.routes.ts
+          type: file
+        - path: /backend/src/routes/productRoutes.ts
           type: file
         - path: /backend/src/routes/index.ts
           type: file
