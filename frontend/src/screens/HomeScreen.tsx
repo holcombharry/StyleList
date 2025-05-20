@@ -4,6 +4,7 @@ import { useThemeColor } from '../hooks/useThemeColor';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationsContext';
+import ScreenHeader from '../components/ScreenHeader';
 
 const HomeScreen: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -49,72 +50,76 @@ const HomeScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <Text style={[styles.title, { color: textColor }]}>
-        Welcome, {user?.name}!
-      </Text>
+      <ScreenHeader title="Home" />
       
-      <Text style={[styles.subtitle, { color: textColor }]}>
-        Push Token:
-      </Text>
-      <ScrollView 
-        horizontal 
-        style={styles.tokenContainer}
-        contentContainerStyle={styles.tokenContent}
-      >
-        <Text style={[styles.token, { color: textColor }]}>
-          {expoPushToken || 'No push token available'}
+      <View style={styles.content}>
+        <Text style={[styles.welcome, { color: textColor }]}>
+          Welcome, {user?.name}!
         </Text>
-      </ScrollView>
-      
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: primaryColor }]}
-          onPress={handleSendNotification}
-        >
-          <Text style={styles.buttonText}>
-            Send Test Notification
-          </Text>
-        </TouchableOpacity>
         
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: primaryColor }]}
-          onPress={handleScheduleNotification}
-        >
-          <Text style={styles.buttonText}>
-            Schedule Notification (5s)
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: 'red' }]} 
-          onPress={logout}
-        >
-          <Text style={styles.buttonText}>
-            Logout
-          </Text>
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.historyContainer}>
         <Text style={[styles.subtitle, { color: textColor }]}>
-          Notification History:
+          Push Token:
         </Text>
-        <ScrollView style={styles.history}>
-          {notificationHistory.length > 0 ? (
-            notificationHistory.map((item, index) => (
-              <Text 
-                key={index} 
-                style={[styles.historyItem, { color: textColor, borderBottomColor: primaryColor }]}
-              >
-                {item}
-              </Text>
-            ))
-          ) : (
-            <Text style={[styles.emptyHistory, { color: textColor }]}>
-              No notifications sent yet
-            </Text>
-          )}
+        <ScrollView 
+          horizontal 
+          style={styles.tokenContainer}
+          contentContainerStyle={styles.tokenContent}
+        >
+          <Text style={[styles.token, { color: textColor }]}>
+            {expoPushToken || 'No push token available'}
+          </Text>
         </ScrollView>
+        
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: primaryColor }]}
+            onPress={handleSendNotification}
+          >
+            <Text style={styles.buttonText}>
+              Send Test Notification
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: primaryColor }]}
+            onPress={handleScheduleNotification}
+          >
+            <Text style={styles.buttonText}>
+              Schedule Notification (5s)
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: 'red' }]} 
+            onPress={logout}
+          >
+            <Text style={styles.buttonText}>
+              Logout
+            </Text>
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.historyContainer}>
+          <Text style={[styles.subtitle, { color: textColor }]}>
+            Notification History:
+          </Text>
+          <ScrollView style={styles.history}>
+            {notificationHistory.length > 0 ? (
+              notificationHistory.map((item, index) => (
+                <Text 
+                  key={index} 
+                  style={[styles.historyItem, { color: textColor, borderBottomColor: primaryColor }]}
+                >
+                  {item}
+                </Text>
+              ))
+            ) : (
+              <Text style={[styles.emptyHistory, { color: textColor }]}>
+                No notifications sent yet
+              </Text>
+            )}
+          </ScrollView>
+        </View>
       </View>
     </View>
   );
@@ -123,13 +128,15 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
     padding: 20,
   },
-  title: {
+  welcome: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    marginTop: 50,
   },
   subtitle: {
     fontSize: 16,

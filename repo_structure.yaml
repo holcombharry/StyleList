@@ -40,6 +40,8 @@
         contents:
         - path: /frontend/src/types/env.d.ts
           type: file
+        - path: /frontend/src/types/user.ts
+          type: file
       - path: /frontend/src/context
         type: directory
         contents:
@@ -60,6 +62,8 @@
           type: file
         - path: /frontend/src/app/reset-code.tsx
           type: file
+        - path: /frontend/src/app/profile.tsx
+          type: file
         - path: /frontend/src/app/reset-password.tsx
           type: file
         - path: /frontend/src/app/_layout.tsx
@@ -72,6 +76,8 @@
         - path: /frontend/src/screens/ForgotPasswordScreen.tsx
           type: file
         - path: /frontend/src/screens/SignupScreen.tsx
+          type: file
+        - path: /frontend/src/screens/ProfileScreen.tsx
           type: file
         - path: /frontend/src/screens/ResetCodeScreen.tsx
           type: file
@@ -98,6 +104,8 @@
             type: file
           - path: /frontend/src/components/auth/AppleLoginButton.tsx
             type: file
+        - path: /frontend/src/components/ScreenHeader.tsx
+          type: file
       - path: /frontend/src/theme
         type: directory
         contents:
